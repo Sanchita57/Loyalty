@@ -1,0 +1,23 @@
+* 	start date: Mar 27 00:00:00 2024 GMT
+* 	expire date: Apr 26 23:59:59 2025 GMT
+* 	common name: www.fis.dev
+* 	issuer: CN=Sectigo RSA Organization Validation Secure Server CA,O=Sectigo Limited,L=Salford,ST=Greater Manchester,C=GB
+* Server auth using Basic with user 'h'
+> GET /artifactory/lty-generic-dev/SC/SC-release_R_9_34_2.zip HTTP/1.1
+> Authorization: Basic aDpzdmNhY2N0LWxveWFsdHlidWlsZA==
+> User-Agent: curl/7.29.0
+> Host: artifactory.fis.dev
+> Accept: */*
+> 
+< HTTP/1.1 401 
+* Authentication problem. Ignoring this.
+< www-authenticate: Basic realm="Artifactory Realm"
+< content-type: application/json;charset=ISO-8859-1
+< content-length: 80
+< date: Thu, 05 Sep 2024 09:49:11 GMT
+< 
+{ [data not shown]
+100    80  100    80    0     0    145      0 --:--:-- --:--:-- --:--:--   146
+100    80  100    80    0     0    145      0 --:--:-- --:--:-- --:--:--   145
+* Connection #0 to host proxy.prod.local left intact
+Command finished with status SUCCESS

@@ -1,0 +1,7 @@
+echo "<+artifact.metadata.fileName>"
+a="<+artifact.metadata.fileName>"
+echo "$a"
+b="${a#*-}"
+echo "$b"
+Artifact="${b%%.*}"
+echo "$Artifact"

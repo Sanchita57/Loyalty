@@ -93,3 +93,52 @@ echo "$Password"
         echo curl -u ${CREDS/:*/:***************} -x $proxy https://artifactory.fis.dev/artifactory/lty-generic-dev/$PROD/$PROD-$TAG.zip -L -O
         curl -v -u svcacct-san:san123 --retry 20 --retry-delay 60 -x $proxy https://artifactory.fis.dev/artifactory/lty-generic-dev/$PROD/$PROD-$TAG.zip -L -O --connect-timeout 300 --max-time 7200
 )
+
+
+&&&&&&
+This Bash script is designed to **download files** (likely product build artifacts) from an artifactory using `curl`. Here's a concise breakdown of its structure and commands:
+
+### 1. **Script Initialization**
+   - `#!/bin/bash`: Defines the script interpreter.
+   - `DIRNAME=$(dirname $0)`, `PROGNAME=$(basename $0)`: Capture the directory and filename of the running script.
+   
+### 2. **Argument Check**
+   - The script checks if there are at least 2 arguments (`prod` and `tag`). If not, it exits with instructions on usage.
+   - `prod`: Specifies the product to download.
+   - `tag`: Specifies the build version (TAG or BRANCH).
+   - `conf` and `unzip`: Optional arguments for configuration and unzip options.
+   - Environmental variables (`proxy`, `CREDS`, `CONF`, `UNZIP_OPTS`, etc.) can also be used for customization.
+
+### 3. **Missing Configuration
+Here's the remainder of the explanation:
+
+### 3. **Missing Configuration Warning**
+   - If no `conf` argument is passed and `CONF` is not set externally, a warning is printed indicating that no configuration has been selected.
+
+### 4. **Handling Credentials (Commented Out)**
+   - The script contains commented-out sections related to handling credentials (`CREDS`). If not provided, the script would ask the user for credentials and set them. This part is disabled by default.
+
+### 5. **Handling `ALL` Products**
+   - If `prod` is set to "ALL", it checks the `LOYALTY_PRODUCTS` variable. If not set, it defaults to "CBRS BP LEM LUMC RN SC".
+   - It loops through each product in the list and recursively calls `download.sh` for each product with the same arguments.
+
+### 6. **Handling Arguments**
+   - If arguments for `tag`, `conf`, and `unzip` options are provided, they are assigned to environment variables.
+   - The default download directory is set to `DIR=..`, but this can be overridden by additional arguments.
+
+### 7. **Download Logic**
+   - The script creates a directory under `/tmp/$PROD` for the product.
+   - It uses `curl` to download a `.zip` file from the specified artifactory using the provided credentials (`CREDS`), `proxy`, and `tag`.
+   - The command runs with options such as retry attempts, delay, and timeouts to ensure reliability during the download.
+
+### 8. **Key Commands**
+   - `curl -u ${CREDS/:*/:***************}`: Uses `CREDS` to download the file while masking the password in the output.
+   - `--retry 20 --retry-delay 60`: Retry the download up to 20 times with a 60-second delay between retries.
+   - `--connect-timeout 300 --max-time 7200`: Sets timeouts to handle long-running downloads.
+
+### 9. **Environment Variables**
+   - `PROD`, `TAG`, `CONF`, `UNZIP_OPTS`, `DIR`, `Username`, `Password`: The script heavily relies on these variables, which can be set through arguments or defaults.
+
+### Summary:
+This script downloads product build artifacts from an artifactory using `curl`, handling authentication and proxy settings. It supports multiple products, configuration options, and retries to ensure
+&&&&&&

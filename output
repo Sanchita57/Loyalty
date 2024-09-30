@@ -21,3 +21,28 @@
 100    80  100    80    0     0    145      0 --:--:-- --:--:-- --:--:--   145
 * Connection #0 to host proxy.prod.local left intact
 Command finished with status SUCCESS
+
+@@@@@
+
+The issue you're encountering is related to **authentication failure**. Specifically, the response from the server is `HTTP/1.1 401`, which indicates **unauthorized access**. This means the credentials you are providing to `curl` are either incorrect or not being passed properly.
+
+### Key points in the output:
+1. **Authentication problem**: The message "Authentication problem. Ignoring this." means that the credentials passed are invalid.
+2. **Authorization Header**: `Authorization: Basic aDpzdmNhY2N0LWxveWFsdHlidWlsZA==` shows that the base64-encoded credentials are sent. However, they seem to be incorrect.
+
+### Steps to troubleshoot and fix:
+
+#### 1. **Check Credentials (`CREDS`)**
+   - The script is using `Basic authentication` where the credentials are encoded into the `Authorization` header (`aDpzdmNhY2N0LWxveWFsdHlidWlsZA==`).
+   - Decode this base64 string to see what credentials are being sent. You can decode it using the following command in your terminal:
+     ```bash
+     echo "aDpzdmNhY2N0LWxveWFsdHlidWlsZA==" | base64 --decode
+     ```
+     Ensure that the decoded value matches the correct `username:password`. If not, update the credentials either in your script or environment variables.
+
+#### 2. **Ensure Correct Proxy Settings**
+   - You are connecting through a proxy (`Connection #0 to host proxy.prod.local left intact`), so ensure that the proxy settings (`proxy`) are correct and accessible.
+
+#### 3. **Verify Artifactory Credentials**
+   - If you're using `CREDS` for authentication (which should be the format `username:
+@@@@@

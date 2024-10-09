@@ -1,0 +1,66 @@
+#!/bin/bash
+set -x
+DIRNAME=$(dirname $0)
+PROGNAME=$(basename $0)
+
+# Check if the number of arguments is less than 2
+if [ $# -lt 2 ]
+then
+  echo "download.sh requires 2 and has 1 conditional and 1 optional arguments :"
+  echo "        prod being one of BP CBRS LEM LUMC RN SC (ALL will download all products)"
+  echo "        tag - the TAG or BRANCH for the build required"
+  echo "        conf - the configuration to be used unless CONF is set externally"
+  echo "        unzip - the unzip options can be set (combinations of -f -o -q) overwriting UNZIP_OPTS "
+  echo ""
+  echo "The following environment settings are also used"
+  echo "        proxy - needed for artifactory suggested value: proxy.fisdev.local:8080"
+  echo "        CREDS - if provided will stop the script using logged in user and prompting for password,"
+  echo "            needed by proxy and artifactory possible values:"
+  echo "                <userid>  - password will be requested when needed"
+  echo "                <userid>:<password>"
+  echo "                svcacct-loyaltybuild:<service user password>"
+  echo "        CONF can set a default value for conf argument (e.g. qa or uat)"
+  echo "        UNZIP_OPTS can set a default value for unzip argument (e.g. -foq freshen-up,overwrite,quietly)"
+  echo "        LOYALTY_PRODUCTS can set list of PRODUCTS for ALL if not the full LIST above"
+  exit 1
+fi
+
+# Check if configuration is missing
+if [ $# -lt 3 ] && [ -z "$CONF" ]
+then
+  echo "Warning no configuration has been selected"
+  echo ""
+fi
+
+# Assign positional parameters to variables
+PROD=$1
+TAG=$2
+CONF=${3:-$CONF}  # Optional argument, uses existing CONF if not provided
+UNZIP_OPTS=${4:-$UNZIP_OPTS}  # Optional argument, uses existing UNZIP_OPTS if not provided
+DIR=${5:-..}  # Optional argument, defaults to '..' if not provided
+USERNAME=$6  # Username
+PASSWORD=$7  # Password
+
+# Handle case for ALL products
+if [ "$PROD" = "ALL" ]
+then
+    LOYALTY_PRODUCTS=${LOYALTY_PRODUCTS:-"CBRS BP LEM LUMC RN SC"}
+    for prod in $LOYALTY_PRODUCTS
+    do
+      download.sh "$prod" "$TAG" "$CONF" "$UNZIP_OPTS" "$DIR" "$USERNAME" "$PASSWORD"
+    done
+    exit 1
+fi
+
+# Create directory
+mkdir -p /tmp/$PROD
+
+(
+    cd /tmp/$PROD || exit
+
+    # Use username and password for Basic Authentication
+    echo curl -u "$USERNAME:**********" -x $proxy https://artifactory.fis.dev/artifactory/lty-generic-dev/$PROD/$PROD-$TAG.zip -L -O
+    curl -v -u "$USERNAME:$PASSWORD" --retry 20 --retry-delay 60 -x proxy.prod.local:8080 https://artifactory.fis.dev/artifactory/lty-generic-dev/$PROD/$PROD-$TAG.zip -L -O --connect-timeout 300 --max-time 7200
+)
+
+echo "$DIRNAME $PROGNAME $PROD $TAG"

@@ -27,7 +27,21 @@ then
   echo "Warning no configuration has been selected"
   echo ""
 fi
-
+#if [ "x$CREDS" = "x" ]
+#then
+#       mytty=$(tty)
+#       mytty=${mytty##*dev/}
+#       u=$(w | grep "$mytty "| cut -d" " -f1)
+#       echo "Enter password for $u :"
+#       read -s p
+#       export CREDS=$u:$p
+#fi
+#if [ "x${CREDS%:*}" = "x${CREDS}" ]
+#then
+#       echo "Enter password for $CREDS :"
+#       read -s p
+#       export CREDS=$CREDS:$p
+#fi
 export PROD=$1
 shift 1
 if [ "x$PROD" = "xALL" ]
@@ -58,12 +72,12 @@ export DIR=..
 if [ $# -gt 0 ]
 then
         export DIR=$1
-        shift 1
 fi
 export Username=$1
 shift 1
 export Password=$1
 shift 1
+
 echo $DIRNAME $PROGNAME $PROD $TAG
 if [ "x${GIT_BASE}" = "x" ]; then
         export GIT_BASE=$HOME
@@ -77,8 +91,10 @@ mkdir -p ${PROD_BASE}/$PROD
         echo curl -u ${CREDS/:*/:***************} -x $proxy https://artifactory.fis.dev/artifactory/lty-generic-dev/$PROD/$PROD-$TAG.zip -L -O
         curl -u $Username:$Password -x $proxy https://artifactory.fis.dev/artifactory/lty-generic-dev/$PROD/$PROD-$TAG.zip -L -O
         rm -fr */lib webapps
-        echo "$UNZIP_OPTS"
         unzip $UNZIP_OPTS ${PROD}-$TAG.zip
+        rm -fr sql
+        unzip -o valuesys/lib/vs2r-persistence-*.jar '*.sql'
+
         if [ "x$CONF" = "x" ]
         then
                 exit 0
@@ -94,7 +110,7 @@ mkdir -p ${PROD_BASE}/$PROD
         fi
         if [[ " production dr test " =~ .*\ $CONF\ .* ]]
         then
-                for exclude in $(sed 's|\r||' productionExclusions.txt); do
+                for exclude in $(cat productionExclusions.txt); do
                         rm -f $exclude
                 done;
         fi

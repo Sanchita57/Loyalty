@@ -56,3 +56,58 @@ if [ "$TAR_FOUND" = false ]; then
 fi
 
 echo "Rollback completed for <+stage.variables.appname>. All artifacts have been restored and untarred if applicable."
+
+#++++++++++++next to pick latest folder+++++++++++
+
+#!/bin/bash
+pwd
+su - <+stage.variables.env_user> -c '
+echo "home:  <+exportedVariables.getValue(\"pipeline.alias.home\")>"
+echo "backup: <+exportedVariables.getValue(\"pipeline.alias.backup\")>"
+
+# Create a variable for the current date in the format YYYY-MM-DD
+current_date=$(date +%Y-%m-%d)
+
+# Define the backup directory
+backup_dir="<+exportedVariables.getValue(\"pipeline.alias.backup\")>/${current_date}/<+stage.variables.appname>"
+to_delete_dir="<+exportedVariables.getValue(\"pipeline.alias.backup\")>/${current_date}"
+
+# Define the working directory
+working_dir="<+exportedVariables.getValue(\"pipeline.alias.home\")>/<+stage.variables.appname>"
+echo "hi"
+
+# Check if the backup directory exists
+if [ -d "${backup_dir}" ]; then
+  echo "Backup directory ${backup_dir} exists. Latest folder is not required."
+else
+  echo "Backup directory ${backup_dir} does not exist. Proceeding with rollback."
+
+  # Check if the directory to be deleted exists
+  if [ -d "<+exportedVariables.getValue(\"pipeline.alias.home\")>/<+stage.variables.appname>" ]; then
+    # Delete the /apps/cbrs folder before rollback
+    rm -rf <+exportedVariables.getValue(\"pipeline.alias.home\")>/<+stage.variables.appname>
+    echo "Directory <+exportedVariables.getValue(\"pipeline.alias.home\")>/<+stage.variables.appname> has been deleted."
+  else
+    echo "Directory <+exportedVariables.getValue(\"pipeline.alias.home\")>/<+stage.variables.appname> does not exist. Nothing to delete."
+  fi
+
+  # Find the latest backup directory if today's backup is not found
+  latest_backup_dir=$(ls -td <+exportedVariables.getValue(\"pipeline.alias.backup\")>/*/<+stage.variables.appname> | head -1)
+  
+  if [ -d "${latest_backup_dir}" ]; then
+    echo "Using latest backup directory: ${latest_backup_dir}"
+    cp -R ${latest_backup_dir}/* ${working_dir}/
+    
+    if [ $? -eq 0 ]; then
+      echo "Rollback of ${working_dir} completed from ${latest_backup_dir}"
+      echo "Unzipping .zip files ... "
+      unzip -o ${working_dir}/*.zip -d ${working_dir}
+      echo "Unzip completed !!"
+    else
+      echo "Rollback not done. Copy command failed."
+    fi
+  else
+    echo "No backup directories found. Rollback failed."
+  fi
+fi
+'

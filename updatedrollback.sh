@@ -76,7 +76,11 @@ echo "Script finished."
 
 
 
-#ccccccc
+#
+
+
+
+
 #!/bin/bash
 
 echo "Starting script..."
@@ -111,7 +115,7 @@ else
   echo "Directory ${working_dir} does not exist. Nothing to delete."
 fi
 
-# Step 3: Check if the backup directory for the current date exists, otherwise use the latest backup directory
+# Check if the backup directory for the current date exists, otherwise use the latest backup directory
 echo "Checking if backup directory exists..."
 source_dir="${backup_dir}"
 if [ ! -d "${backup_dir}" ]; then
@@ -151,5 +155,6 @@ else
 fi
 '
 echo "Script finished."
+
 
 
